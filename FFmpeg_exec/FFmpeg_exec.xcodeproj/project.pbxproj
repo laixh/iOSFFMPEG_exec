@@ -52,6 +52,8 @@
 		D0B455D5239B428E00829CDC /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0B455C8239B428E00829CDC /* libswscale.a */; };
 		D0B455D6239B428E00829CDC /* cmdutils.c in Sources */ = {isa = PBXBuildFile; fileRef = D0B455C9239B428E00829CDC /* cmdutils.c */; };
 		D0B455D8239B484500829CDC /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D0B455D7239B484500829CDC /* libx264.a */; };
+		D0B45705239B848500829CDC /* gtv_logger.c in Sources */ = {isa = PBXBuildFile; fileRef = D0B45701239B848500829CDC /* gtv_logger.c */; };
+		D0B45709239B85EA00829CDC /* gtv_ios_logger.m in Sources */ = {isa = PBXBuildFile; fileRef = D0B45707239B85EA00829CDC /* gtv_ios_logger.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,19 +62,19 @@
 			containerPortal = B967BD7F1E89493700230801 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = B967BD861E89493700230801;
-			remoteInfo = "FFmpeg_exec";
+			remoteInfo = FFmpeg_exec;
 		};
 		B967BDAC1E89493800230801 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B967BD7F1E89493700230801 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = B967BD861E89493700230801;
-			remoteInfo = "FFmpeg_exec";
+			remoteInfo = FFmpeg_exec;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		B967BD871E89493700230801 /* FFmpeg_exec.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FFmpeg_exec.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B967BD871E89493700230801 /* FFmpeg_exec.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FFmpeg_exec.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B967BD8B1E89493700230801 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		B967BD8D1E89493700230801 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		B967BD8E1E89493700230801 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -82,10 +84,10 @@
 		B967BD961E89493700230801 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B967BD991E89493700230801 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B967BD9B1E89493700230801 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B967BDA01E89493700230801 /* FFmpeg_execTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "FFmpeg_execTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B967BDA01E89493700230801 /* FFmpeg_execTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FFmpeg_execTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B967BDA41E89493700230801 /* FFmpeg___Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "FFmpeg___Tests.m"; sourceTree = "<group>"; };
 		B967BDA61E89493800230801 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B967BDAB1E89493800230801 /* FFmpeg_execUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "FFmpeg_execUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B967BDAB1E89493800230801 /* FFmpeg_execUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FFmpeg_execUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B967BDAF1E89493800230801 /* FFmpeg___UITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "FFmpeg___UITests.m"; sourceTree = "<group>"; };
 		B967BDB11E89493800230801 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B967BDC01E89495700230801 /* avcodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avcodec.h; sourceTree = "<group>"; };
@@ -306,7 +308,7 @@
 		D0B45537239B419200829CDC /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswscale.a; sourceTree = "<group>"; };
 		D0B4553C239B419200829CDC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D0B4553E239B419200829CDC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Main.storyboard; sourceTree = "<group>"; };
-		D0B45541239B419200829CDC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = "FFmpeg_exec/Assets.xcassets"; sourceTree = SOURCE_ROOT; };
+		D0B45541239B419200829CDC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = FFmpeg_exec/Assets.xcassets; sourceTree = SOURCE_ROOT; };
 		D0B45553239B428D00829CDC /* ffmpeg.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ffmpeg.c; sourceTree = "<group>"; };
 		D0B45554239B428D00829CDC /* cmdutils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cmdutils.h; sourceTree = "<group>"; };
 		D0B45557239B428D00829CDC /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
@@ -419,6 +421,11 @@
 		D0B455C9239B428E00829CDC /* cmdutils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cmdutils.c; sourceTree = "<group>"; };
 		D0B455CA239B428E00829CDC /* ffmpeg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffmpeg.h; sourceTree = "<group>"; };
 		D0B455D7239B484500829CDC /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libx264.a; sourceTree = "<group>"; };
+		D0B456FC239B848400829CDC /* gtv_logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gtv_logger.h; sourceTree = "<group>"; };
+		D0B45700239B848500829CDC /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		D0B45701239B848500829CDC /* gtv_logger.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gtv_logger.c; sourceTree = "<group>"; };
+		D0B45707239B85EA00829CDC /* gtv_ios_logger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = gtv_ios_logger.m; path = ios/gtv_ios_logger.m; sourceTree = "<group>"; };
+		D0B45708239B85EA00829CDC /* gtv_ios_logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gtv_ios_logger.h; path = ios/gtv_ios_logger.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -510,7 +517,7 @@
 				B967BE431E89582800230801 /* 1.mp4 */,
 				B967BD8A1E89493700230801 /* Supporting Files */,
 			);
-			path = "FFmpeg_exec";
+			path = FFmpeg_exec;
 			sourceTree = "<group>";
 		};
 		B967BD8A1E89493700230801 /* Supporting Files */ = {
@@ -527,7 +534,7 @@
 				B967BDA41E89493700230801 /* FFmpeg___Tests.m */,
 				B967BDA61E89493800230801 /* Info.plist */,
 			);
-			path = "FFmpeg_execTests";
+			path = FFmpeg_execTests;
 			sourceTree = "<group>";
 		};
 		B967BDAE1E89493800230801 /* FFmpeg_execUITests */ = {
@@ -536,12 +543,17 @@
 				B967BDAF1E89493800230801 /* FFmpeg___UITests.m */,
 				B967BDB11E89493800230801 /* Info.plist */,
 			);
-			path = "FFmpeg_execUITests";
+			path = FFmpeg_execUITests;
 			sourceTree = "<group>";
 		};
 		B967BDBD1E89495700230801 /* FFmpeg-iOS */ = {
 			isa = PBXGroup;
 			children = (
+				D0B45708239B85EA00829CDC /* gtv_ios_logger.h */,
+				D0B45707239B85EA00829CDC /* gtv_ios_logger.m */,
+				D0B45700239B848500829CDC /* config.h */,
+				D0B45701239B848500829CDC /* gtv_logger.c */,
+				D0B456FC239B848400829CDC /* gtv_logger.h */,
 				D0B455C9239B428E00829CDC /* cmdutils.c */,
 				D0B45554239B428D00829CDC /* cmdutils.h */,
 				D0B455BE239B428D00829CDC /* ffmpeg_filter.c */,
@@ -937,7 +949,7 @@
 				D0B4553D239B419200829CDC /* Main.storyboard */,
 			);
 			name = Base.lproj;
-			path = "FFmpeg_exec/Base.lproj";
+			path = FFmpeg_exec/Base.lproj;
 			sourceTree = SOURCE_ROOT;
 		};
 		D0B45555239B428D00829CDC /* include */ = {
@@ -1130,8 +1142,8 @@
 			);
 			dependencies = (
 			);
-			name = "FFmpeg_exec";
-			productName = "FFmpeg_exec";
+			name = FFmpeg_exec;
+			productName = FFmpeg_exec;
 			productReference = B967BD871E89493700230801 /* FFmpeg_exec.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1148,8 +1160,8 @@
 			dependencies = (
 				B967BDA21E89493700230801 /* PBXTargetDependency */,
 			);
-			name = "FFmpeg_execTests";
-			productName = "FFmpeg_execTests";
+			name = FFmpeg_execTests;
+			productName = FFmpeg_execTests;
 			productReference = B967BDA01E89493700230801 /* FFmpeg_execTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
@@ -1166,8 +1178,8 @@
 			dependencies = (
 				B967BDAD1E89493800230801 /* PBXTargetDependency */,
 			);
-			name = "FFmpeg_execUITests";
-			productName = "FFmpeg_execUITests";
+			name = FFmpeg_execUITests;
+			productName = FFmpeg_execUITests;
 			productReference = B967BDAB1E89493800230801 /* FFmpeg_execUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
@@ -1262,9 +1274,11 @@
 				B967BD921E89493700230801 /* ViewController.m in Sources */,
 				D0B455CC239B428E00829CDC /* ffmpeg_filter.c in Sources */,
 				B967BD8F1E89493700230801 /* AppDelegate.m in Sources */,
+				D0B45709239B85EA00829CDC /* gtv_ios_logger.m in Sources */,
 				D0B455CE239B428E00829CDC /* ffmpeg_hw.c in Sources */,
 				D0B455CB239B428E00829CDC /* ffmpeg.c in Sources */,
 				B967BD8C1E89493700230801 /* main.m in Sources */,
+				D0B45705239B848500829CDC /* gtv_logger.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1428,8 +1442,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = YR5SNFA49W;
-				"HEADER_SEARCH_PATHS[arch=*]" = "$(PROJECT_DIR)/FFmpeg_exec/FFmpeg-iOS/include";
-				INFOPLIST_FILE = "FFmpeg_exec/Info.plist";
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"$(PROJECT_DIR)/FFmpeg_exec/FFmpeg-iOS/include",
+					"$(PROJECT_DIR)/FFmpeg_exec/FFmpeg-iOS/ios",
+				);
+				INFOPLIST_FILE = FFmpeg_exec/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
@@ -1446,8 +1463,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = YR5SNFA49W;
-				"HEADER_SEARCH_PATHS[arch=*]" = "$(PROJECT_DIR)/FFmpeg_exec/FFmpeg-iOS/include";
-				INFOPLIST_FILE = "FFmpeg_exec/Info.plist";
+				"HEADER_SEARCH_PATHS[arch=*]" = (
+					"$(PROJECT_DIR)/FFmpeg_exec/FFmpeg-iOS/include",
+					"$(PROJECT_DIR)/FFmpeg_exec/FFmpeg-iOS/ios",
+				);
+				INFOPLIST_FILE = FFmpeg_exec/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
@@ -1464,7 +1484,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = YR5SNFA49W;
-				INFOPLIST_FILE = "FFmpeg_execTests/Info.plist";
+				INFOPLIST_FILE = FFmpeg_execTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.shanhujianglaixh.FFmpeg---Tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1477,7 +1497,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				DEVELOPMENT_TEAM = YR5SNFA49W;
-				INFOPLIST_FILE = "FFmpeg_execTests/Info.plist";
+				INFOPLIST_FILE = FFmpeg_execTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.shanhujianglaixh.FFmpeg---Tests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1489,11 +1509,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEVELOPMENT_TEAM = YR5SNFA49W;
-				INFOPLIST_FILE = "FFmpeg_execUITests/Info.plist";
+				INFOPLIST_FILE = FFmpeg_execUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.shanhujianglaixh.FFmpeg---UITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_TARGET_NAME = "FFmpeg_exec";
+				TEST_TARGET_NAME = FFmpeg_exec;
 			};
 			name = Debug;
 		};
@@ -1501,11 +1521,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEVELOPMENT_TEAM = YR5SNFA49W;
-				INFOPLIST_FILE = "FFmpeg_execUITests/Info.plist";
+				INFOPLIST_FILE = FFmpeg_execUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.shanhujianglaixh.FFmpeg---UITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_TARGET_NAME = "FFmpeg_exec";
+				TEST_TARGET_NAME = FFmpeg_exec;
 			};
 			name = Release;
 		};

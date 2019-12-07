@@ -32,8 +32,8 @@ void gtv_logger_set_level(uint8_t level);
 void gtv_logger_set_callback(gtv_logger_inject_callback cb);
 void gtv_logger_print(int level, const char * format, ...);
 
-//#define GTV_PRINT(level, fmt, ...)      do { gtv_logger_print(level, fmt, ##__VA_ARGS__); } while(0);
-#define GTV_PRINT(level, fmt, ...)      ;
+#define GTV_PRINT(level, fmt, ...)      do { gtv_logger_print(level, fmt, ##__VA_ARGS__); } while(0);
+//#define GTV_PRINT(level, fmt, ...)      ;
 
 #define GTV_ERROR(fmt, ...)             GTV_PRINT(GTV_LOGERROR, fmt, ##__VA_ARGS__)
 #define GTV_WARN(fmt, ...)              GTV_PRINT(GTV_LOGWARNING, fmt, ##__VA_ARGS__)
