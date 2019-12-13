@@ -63,11 +63,24 @@ extern int ffmpeg_exec(int argc, char * argv[]);
 {
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         char *outPic = (char *)[DocumentPath(@"transcodeout.mp4") UTF8String];
-        char *movie = (char *)[BundlePath(@"1.mp4") UTF8String];
+        char *movie1 = (char *)[BundlePath(@"1.mp4") UTF8String];
+        char *movie2 = (char *)[BundlePath(@"2.mp4") UTF8String];
         char* a[] = {
             "ffmpeg",
+//            "-ss",
+//            "3",
+//            "-t",
+//            "5",
+//            "-accurate_seek",
             "-i",
-            movie,
+            movie1,
+//            "-ss",
+//            "8",
+//            "-t",
+//            "2",
+//            "-accurate_seek",
+            "-i",
+            movie2,
             "-vcodec",
             "libx264",
             "-acodec",
@@ -75,6 +88,7 @@ extern int ffmpeg_exec(int argc, char * argv[]);
             "-y",
             outPic
         };
+        
         ffmpeg_exec(sizeof(a)/sizeof(*a), a);
     });
 }
