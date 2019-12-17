@@ -125,6 +125,17 @@ static void* g_dst_path;
 static	int g_quhepai_width=0;
 static	int g_quhepai_height=0;
 
+//laixhcode
+extern OptionParseContext mgted_get_octx(void);
+extern int MGTED_open_files(OptionGroupList *l, const char *inout,int icnt,int (*open_file)(OptionsContext*, const char*));
+extern int MGTED_open_input_file(OptionsContext *o, const char *filename);
+int MGTED_open_output_file(OptionsContext *o, const char *filename);
+extern int MGTED_init_complex_filters(void);
+//extern Task * MGTED_get_task(void);
+static out_init_flg = 0;
+
+static char *root_path = NULL;
+
 const char *const forced_keyframes_const_names[] = {
     "n",
     "n_forced",
@@ -2458,6 +2469,37 @@ static int decode_audio(InputStream *ist, AVPacket *pkt, int *got_output,
     return err < 0 ? err : ret;
 }
 
+void yuv420p_save_test(unsigned char *y_buf , unsigned char *u_buf,unsigned char *v_buf,int width,int height,char *filename)
+{
+    int i = 0;
+    FILE *f;
+    
+    f = fopen(filename,"a+");
+    
+    
+    int height_half = height / 2, width_half = width / 2;
+    int y_wrap = width;
+    int u_wrap = width/2;
+    //int u_wrap = pFrame->linesize[0];
+    //int v_wrap = pFrame->linesize[0];
+    int v_wrap = width/2;
+    
+    //save y
+    for (i = 0; i < height; i++)
+        fwrite(y_buf + i * y_wrap, 1, width, f);
+    //save u
+    for (i = 0; i < height_half; i++)
+        fwrite(u_buf + i * u_wrap, 1, width_half, f);
+    //save v
+    for (i = 0; i < height_half; i++)
+        fwrite(v_buf + i * v_wrap, 1, width_half, f);
+    
+    fflush(f);
+    fclose(f);
+}
+
+
+
 static int decode_video(InputStream *ist, AVPacket *pkt, int *got_output, int64_t *duration_pts, int eof,
                         int *decode_failed)
 {
@@ -2609,6 +2651,9 @@ static int decode_video(InputStream *ist, AVPacket *pkt, int *got_output, int64_
         decoded_frame->sample_aspect_ratio = ist->st->sample_aspect_ratio;
 
     GTV_ERROR("laixh1 send_frame_to_filters------------decoded_frame->pts=%lld, %f\n",decoded_frame->pts,decoded_frame->pts * av_q2d( ist->st->time_base ));
+    
+    //laixhcode7
+    //yuv420p_save_test(decoded_frame->data[0],decoded_frame->data[1],decoded_frame->data[2], decoded_frame->width,decoded_frame->height,root_path);
     err = send_frame_to_filters(ist, decoded_frame);
 
 fail:
@@ -2801,6 +2846,7 @@ static int process_input_packet(InputStream *ist, const AVPacket *pkt, int no_eo
         }
 
         if (ret == AVERROR_EOF) {
+            ist->eof_reached = 1;
             eof_reached = 1;
             break;
         }
@@ -3001,7 +3047,80 @@ static int init_input_stream(int ist_index, char *error, int error_len)
     int ret;
     InputStream *ist = input_streams[ist_index];
 
-    if (ist->decoding_needed) {
+    if (ist->decoding_needed)
+    {
+        AVCodec *codec = ist->dec;
+        if (!codec) {
+            snprintf(error, error_len, "Decoder (codec %s) not found for input stream #%d:%d",
+                    avcodec_get_name(ist->dec_ctx->codec_id), ist->file_index, ist->st->index);
+            return AVERROR(EINVAL);
+        }
+
+        ist->dec_ctx->opaque                = ist;
+        ist->dec_ctx->get_format            = get_format;
+        ist->dec_ctx->get_buffer2           = get_buffer;
+        ist->dec_ctx->thread_safe_callbacks = 1;
+
+        av_opt_set_int(ist->dec_ctx, "refcounted_frames", 1, 0);
+        if (ist->dec_ctx->codec_id == AV_CODEC_ID_DVB_SUBTITLE &&
+           (ist->decoding_needed & DECODING_FOR_OST)) {
+            av_dict_set(&ist->decoder_opts, "compute_edt", "1", AV_DICT_DONT_OVERWRITE);
+            if (ist->decoding_needed & DECODING_FOR_FILTER)
+                GTV_ERROR( "Warning using DVB subtitles for filtering and output at the same time is not fully supported, also see -compute_edt [0|1]\n");
+        }
+
+        av_dict_set(&ist->decoder_opts, "sub_text_format", "ass", AV_DICT_DONT_OVERWRITE);
+
+        /* Useful for subtitles retiming by lavf (FIXME), skipping samples in
+         * audio, and video decoders such as cuvid or mediacodec */
+        av_codec_set_pkt_timebase(ist->dec_ctx, ist->st->time_base);
+
+        if(g_quhepai_width * g_quhepai_height <= 1080*1920){
+
+            if (!av_dict_get(ist->decoder_opts, "threads", NULL, 0))
+                av_dict_set(&ist->decoder_opts, "threads", "auto", 0);
+            /* Attached pics are sparse, therefore we would not want to delay their decoding till EOF. */
+            if (ist->st->disposition & AV_DISPOSITION_ATTACHED_PIC)
+                av_dict_set(&ist->decoder_opts, "threads", "1", 0);
+        }
+        g_quhepai_width = 0;
+        g_quhepai_height = 0;
+
+        ret = hw_device_setup_for_decode(ist);
+        if (ret < 0) {
+            snprintf(error, error_len, "Device setup failed for "
+                     "decoder on input stream #%d:%d : %s",
+                     ist->file_index, ist->st->index, av_err2str(ret));
+            return ret;
+        }
+
+        if ((ret = avcodec_open2(ist->dec_ctx, codec, &ist->decoder_opts)) < 0) {
+            if (ret == AVERROR_EXPERIMENTAL)
+                abort_codec_experimental(codec, 0);
+
+            snprintf(error, error_len,
+                     "Error while opening decoder for input stream "
+                     "#%d:%d : %s",
+                     ist->file_index, ist->st->index, av_err2str(ret));
+            return ret;
+        }
+        assert_avoptions(ist->decoder_opts);
+    }
+
+    ist->next_pts = AV_NOPTS_VALUE;
+    ist->next_dts = AV_NOPTS_VALUE;
+
+    return 0;
+}
+
+static int MGTED_init_input_stream(int ist_index, char *error, int error_len)
+{
+    int ret;
+    InputStream *ist = input_streams[ist_index];
+
+    //laixhcode0
+    if (ist->decoding_needed)
+    {
         AVCodec *codec = ist->dec;
         if (!codec) {
             snprintf(error, error_len, "Decoder (codec %s) not found for input stream #%d:%d",
@@ -3752,6 +3871,81 @@ static void report_new_stream(int input_index, AVPacket *pkt)
     file->nb_streams_warn = pkt->stream_index + 1;
 }
 
+static int MGTED_prj_transcode_init(void)
+{
+    int ret = 0, i, j, k;
+    AVFormatContext *oc;
+    OutputStream *ost;
+    InputStream *ist;
+    char error[1024] = {0};
+
+
+
+    /* init framerate emulation */
+    for (i = 0; i < nb_input_files; i++) {
+        InputFile *ifile = input_files[i];
+        if (ifile->rate_emu)
+            for (j = 0; j < ifile->nb_streams; j++)
+                input_streams[j + ifile->ist_index]->start = av_gettime_relative();
+    }
+
+    /* init input streams */
+    for (i = 0; i < nb_input_streams; i++)
+        if ((ret = MGTED_init_input_stream(i, error, sizeof(error))) < 0) {
+            for (i = 0; i < nb_output_streams; i++) {
+                ost = output_streams[i];
+                avcodec_close(ost->enc_ctx);
+            }
+            goto dump_format;
+        }
+
+    /* discard unused programs */
+    for (i = 0; i < nb_input_files; i++) {
+        InputFile *ifile = input_files[i];
+        for (j = 0; j < ifile->ctx->nb_programs; j++) {
+            AVProgram *p = ifile->ctx->programs[j];
+            int discard  = AVDISCARD_ALL;
+
+            for (k = 0; k < p->nb_stream_indexes; k++)
+                if (!input_streams[ifile->ist_index + p->stream_index[k]]->discard) {
+                    discard = AVDISCARD_DEFAULT;
+                    break;
+                }
+            p->discard = discard;
+        }
+    }
+
+   
+
+ dump_format:
+    /* dump the stream mapping */
+    GTV_ERROR( "Stream mapping:\n");
+    for (i = 0; i < nb_input_streams; i++) {
+        ist = input_streams[i];
+
+        for (j = 0; j < ist->nb_filters; j++) {
+            if (!filtergraph_is_simple(ist->filters[j]->graph)) {
+                GTV_ERROR( "  Stream #%d:%d (%s) -> %s",
+                       ist->file_index, ist->st->index, ist->dec ? ist->dec->name : "?",
+                       ist->filters[j]->name);
+                if (nb_filtergraphs > 1)
+                    GTV_ERROR( " (graph %d)", ist->filters[j]->graph->index);
+                GTV_ERROR( "\n");
+            }
+        }
+    }
+
+
+    if (ret) {
+        GTV_ERROR( "%s\n", error);
+        return ret;
+    }
+
+    atomic_store(&transcode_init_done, 1);
+
+    return 0;
+}
+
 static int transcode_init(void)
 {
     int ret = 0, i, j, k;
@@ -3926,6 +4120,22 @@ static int transcode_init(void)
 }
 
 /* Return 1 if there remain streams where more output is wanted, 0 otherwise. */
+static int MGTED_is_decode_finish(void)
+{
+    int i;
+
+    for (i = 0; i < nb_input_streams; i++) {
+        InputStream *ist    = input_streams[i];
+
+        if (ist->eof_reached)
+            continue;
+        
+        return 1;
+    }
+
+    return 0;
+}
+/* Return 1 if there remain streams where more output is wanted, 0 otherwise. */
 static int need_output(void)
 {
     int i;
@@ -3979,6 +4189,30 @@ static OutputStream *choose_output(void)
         }
     }
     return ost_min;
+}
+
+static InputStream *MGTED_choose_input(void)
+{
+    int i;
+    int g_i;
+    int64_t opts_min = INT64_MAX;
+    InputStream *ist_min = NULL;
+
+    for (i = 0; i < nb_input_streams; i++) {
+        InputStream *ist = input_streams[i];
+        int64_t opts = ist->st->cur_dts == AV_NOPTS_VALUE ? INT64_MIN :
+                       av_rescale_q(ist->st->cur_dts, ist->st->time_base,
+                                    AV_TIME_BASE_Q);
+        if (ist->st->cur_dts == AV_NOPTS_VALUE)
+           GTV_ERROR( "cur_dts is invalid (this is harmless if it occurs once at the start per stream)\n");
+        if (!ist->eof_reached &&  opts < opts_min) {
+            opts_min = opts;
+            g_i = i;
+            ist_min  = ist;
+         }
+    }
+    GTV_ERROR( "g_i =%d,ist->st->cur_dts=%lld,ist->eof_reached=%d,opts_min=%d\n",g_i ,ist_min->st->cur_dts,ist_min->eof_reached,opts_min);
+    return ist_min;
 }
 
 static void set_tty_echo(int on)
@@ -4636,6 +4870,8 @@ static int transcode_step(void)
     InputStream  *ist = NULL;
     int ret;
 
+    //laixhcode2
+#if 0
     ost = choose_output();
     if (!ost) {
         if (got_eagain()) {
@@ -4689,6 +4925,11 @@ static int transcode_step(void)
         ist = input_streams[ost->source_index];
     }
 
+#endif
+    ist = MGTED_choose_input();
+    if(ist == NULL){
+        return 0;
+    }
     ret = process_input(ist->file_index);
     if (ret == AVERROR(EAGAIN)) {
         if (input_files[ist->file_index]->eagain)
@@ -4699,28 +4940,45 @@ static int transcode_step(void)
     if (ret < 0)
         return ret == AVERROR_EOF ? 0 : ret;
 
-    return reap_filters(0);
+    //laixhcode3
+    return 0;
+    //return reap_filters(0);
 }
 
 /*
  * The following code is the main loop of the file converter
  */
+void root_path_init22(char *dstpath ,char *srcpath)
+{
+    char *tmp_ptr = strrchr(srcpath , '/');
+    uint16_t tmp_ptr_len = strlen(tmp_ptr);
+    uint16_t dst_video_len = strlen(srcpath );
+    memset(dstpath,0,1024);
+    memcpy(dstpath,srcpath,dst_video_len - tmp_ptr_len);
+}
+
+void global_variable_reinit(void){
+    nb_input_files   = 0;
+    nb_input_streams = 0;
+}
+
 static int transcode(void)
 {
-    int ret, i;
+    int ret, i,j;
     AVFormatContext *os;
     OutputStream *ost;
     InputStream *ist;
     int64_t timer_start;
     int64_t total_packets_written = 0;
 
-    ret = transcode_init();
-    if (ret < 0)
-        goto fail;
+    //laixhcode0
+//    ret = transcode_init();
+//    if (ret < 0)
+//        goto fail;
 
-    if (stdin_interaction) {
-        GTV_ERROR(  "Press [q] to stop, [?] for help\n");
-    }
+//    if (stdin_interaction) {
+//        GTV_ERROR(  "Press [q] to stop, [?] for help\n");
+//    }
 
     timer_start = av_gettime_relative();
 
@@ -4728,40 +4986,105 @@ static int transcode(void)
     if ((ret = init_input_threads()) < 0)
         goto fail;
 #endif
-
-    while (!received_sigterm) {
-        int64_t cur_time= av_gettime_relative();
-        if(cancel_ffmpegexe != 0){
-            GTV_ERROR( "suzy transcode cancel_ffmpegexe:%d\n",cancel_ffmpegexe);
-            return -1;
+    OptionParseContext octx = mgted_get_octx();
+//    //Task *task = MGTED_get_task();
+//    
+//    root_path = malloc(1024);
+//    root_path_init22(root_path,octx.groups[0].groups[0].arg);
+//    strcat(root_path, "/lincy.yuv");
+    
+    
+    //laixhcode1
+    for (i = 0; i<1/*i<task->project_num/*2*/; i++) {
+       
+        /* open input files */
+        ret = MGTED_open_files(&octx.groups[1], "input", i,MGTED_open_input_file);
+        if (ret < 0) {
+            GTV_ERROR( "Error opening output files: ");
+            goto fail;
         }
-        /* if 'q' pressed, exits */
-        if (stdin_interaction)
-            if (check_keyboard_interaction(cur_time) < 0)
+        if(out_init_flg == 0){
+            /* create the complex filtergraphs */
+//            ret = MGTED_init_complex_filters();
+//            if (ret < 0) {
+//                GTV_ERROR( "Error initializing complex filters.\n");
+//                goto fail;
+//            }
+
+            ret = MGTED_open_files(&octx.groups[0], "output",0, MGTED_open_output_file);
+            if (ret < 0) {
+                GTV_ERROR( "Error opening output files: ");
+                goto fail;
+            }
+            out_init_flg = 1;
+        }
+    
+        
+        if (ret < 0) {
+            GTV_ERROR( "Error opening input files: ");
+            goto fail;
+        }
+
+        ret = MGTED_prj_transcode_init();
+        if (ret < 0)
+            goto fail;
+        
+        while (!received_sigterm) {
+            int64_t cur_time= av_gettime_relative();
+            if(cancel_ffmpegexe != 0){
+                GTV_ERROR( "suzy transcode cancel_ffmpegexe:%d\n",cancel_ffmpegexe);
+                return -1;
+            }
+            /* if 'q' pressed, exits */
+            if (stdin_interaction)
+                if (check_keyboard_interaction(cur_time) < 0)
+                    break;
+
+            /* check if there's any stream where output is still needed */
+            if (!MGTED_is_decode_finish()) {
+                /* at the end of stream, we must flush the decoder buffers */
+                for (j = 0; j < nb_input_streams; j++) {
+                    ist = input_streams[j];
+                    if (!input_files[ist->file_index]->eof_reached && ist->decoding_needed) {
+                        process_input_packet(ist, NULL, 0);
+                    }
+                }
+                /* close each decoder */
+                for (j = 0; j < nb_input_streams; j++) {
+                    ist = input_streams[j];
+                    if (ist->decoding_needed) {
+                        avcodec_close(ist->dec_ctx);
+                        if (ist->hwaccel_uninit)
+                            ist->hwaccel_uninit(ist->dec_ctx);
+                    }
+                }
+                global_variable_reinit();
+                
+                GTV_ERROR(  "No more output streams to write to, finishing.\n");
                 break;
+            }
 
-        /* check if there's any stream where output is still needed */
-        if (!need_output()) {
-           GTV_ERROR(  "No more output streams to write to, finishing.\n");
-            break;
+            ret = transcode_step();
+            if (ret < 0 && ret != AVERROR_EOF) {
+                char errbuf[128];
+                av_strerror(ret, errbuf, sizeof(errbuf));
+
+                GTV_ERROR(  "Error while filtering: %s\n", errbuf);
+                break;
+            }
+
+            /* dump report by using the output first video and audio streams */
+//            print_report(0, timer_start, cur_time);
         }
-
-        ret = transcode_step();
-        if (ret < 0 && ret != AVERROR_EOF) {
-            char errbuf[128];
-            av_strerror(ret, errbuf, sizeof(errbuf));
-
-            GTV_ERROR(  "Error while filtering: %s\n", errbuf);
-            break;
-        }
-
-        /* dump report by using the output first video and audio streams */
-        print_report(0, timer_start, cur_time);
+        
     }
 #if HAVE_PTHREADS
     free_input_threads();
 #endif
-
+    //laixhcode
+    while(1){
+        //
+    }
     /* at the end of stream, we must flush the decoder buffers */
     for (i = 0; i < nb_input_streams; i++) {
         ist = input_streams[i];
@@ -4936,27 +5259,27 @@ int ffmpeg_exec(int argc, char **argv)
     if (ret != 0)
         return exit_program(ret);
 
-    if (nb_output_files <= 0 && nb_input_files == 0) {
-        show_usage();
-        GTV_ERROR(  "Use -h to get full help or, even better, run 'man %s'\n", program_name);
-        return exit_program(1);
-    }
+//    if (nb_output_files <= 0 && nb_input_files == 0) {
+//        show_usage();
+//        GTV_ERROR(  "Use -h to get full help or, even better, run 'man %s'\n", program_name);
+//        return exit_program(1);
+//    }
 
     /* file converter / grab */
-    if (nb_output_files <= 0) {
-        GTV_ERROR(  "At least one output file must be specified\n");
-        return exit_program(1);
-    }
+//    if (nb_output_files <= 0) {
+//        GTV_ERROR(  "At least one output file must be specified\n");
+//        return exit_program(1);
+//    }
 
 //     if (nb_input_files == 0) {
 //         GTV_ERROR( "At least one input file must be specified\n");
 //         exit_program(1);
 //     }
 
-    for (i = 0; i < nb_output_files; i++) {
-        if (strcmp(output_files[i]->ctx->oformat->name, "rtp"))
-            want_sdp = 0;
-    }
+//    for (i = 0; i < nb_output_files; i++) {
+//        if (strcmp(output_files[i]->ctx->oformat->name, "rtp"))
+//            want_sdp = 0;
+//    }
 
     current_time = ti = getutime();
     if (transcode() < 0)
