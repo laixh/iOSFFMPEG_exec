@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:FFmpeg&#x547d;&#x4ee4;&#x884c;.xcodeproj">
+      location = "self:">
    </FileRef>
 </Workspace>
