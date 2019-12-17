@@ -4995,7 +4995,7 @@ static int transcode(void)
     
     
     //laixhcode1
-    for (i = 0; i<1/*i<task->project_num/*2*/; i++) {
+    for (i = 0; i<2/*i<task->project_num/*2*/; i++) {
        
         /* open input files */
         ret = MGTED_open_files(&octx.groups[1], "input", i,MGTED_open_input_file);
@@ -5011,11 +5011,11 @@ static int transcode(void)
 //                goto fail;
 //            }
 
-            ret = MGTED_open_files(&octx.groups[0], "output",0, MGTED_open_output_file);
-            if (ret < 0) {
-                GTV_ERROR( "Error opening output files: ");
-                goto fail;
-            }
+//            ret = MGTED_open_files(&octx.groups[0], "output",0, MGTED_open_output_file);
+//            if (ret < 0) {
+//                GTV_ERROR( "Error opening output files: ");
+//                goto fail;
+//            }
             out_init_flg = 1;
         }
     

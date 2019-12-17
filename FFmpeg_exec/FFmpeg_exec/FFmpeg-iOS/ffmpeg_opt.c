@@ -745,13 +745,19 @@ static void add_input_streams(OptionsContext *o, AVFormatContext *ic)
         input_streams[nb_input_streams - 1] = ist;
 
         ist->st = st;
-        //laixhcode0add
-        input_streams[0]->discard = 0;
-        input_streams[0]->st->discard = input_streams[0]->user_set_discard;
         
+       
         ist->file_index = nb_input_files;
+        
         ist->discard = 1;
         st->discard  = AVDISCARD_ALL;
+        
+        //laixhcode0add
+        input_streams[i]->discard = 0;
+        input_streams[i]->st->discard = AVDISCARD_NONE;//input_streams[i]->user_set_discard;
+//        input_streams[source_index]->discard = 0;//laixhcodecc end去掉这句后音频解码不正常
+//        input_streams[source_index]->st->discard = input_streams[source_index]->user_set_discard;
+        
         ist->nb_samples = 0;
         ist->min_pts = INT64_MAX;
         ist->max_pts = INT64_MIN;
@@ -1759,7 +1765,7 @@ static OutputStream *new_output_stream(OptionsContext *o, AVFormatContext *oc, e
     ost->source_index = source_index;
     if (source_index >= 0) {
         ost->sync_ist = input_streams[source_index];
-        input_streams[source_index]->discard = 0;
+        input_streams[source_index]->discard = 0;//laixhcodecc end去掉这句后音频解码不正常
         input_streams[source_index]->st->discard = input_streams[source_index]->user_set_discard;
     }
     ost->last_mux_dts = AV_NOPTS_VALUE;
@@ -2055,8 +2061,11 @@ static OutputStream *new_audio_stream(OptionsContext *o, AVFormatContext *oc, in
     AVStream *st;
     OutputStream *ost;
     AVCodecContext *audio_enc;
-
+    //laixhcodecc去掉后音频解码不正常
+    //#if 0
     ost = new_output_stream(o, oc, AVMEDIA_TYPE_AUDIO, source_index);
+    //laixhcodecc去掉后音频解码正常
+    #if 0
     st  = ost->st;
 
     audio_enc = ost->enc_ctx;
@@ -2087,6 +2096,8 @@ static OutputStream *new_audio_stream(OptionsContext *o, AVFormatContext *oc, in
             exit_program(1);
 
         /* check for channel mapping for this audio stream */
+        //laixhcodecc//去掉后音频解码正常
+        #if 0
         for (n = 0; n < o->nb_audio_channel_maps; n++) {
             AudioChannelMap *map = &o->audio_channel_maps[n];
             if ((map->ofile_idx   == -1 || ost->file_index == map->ofile_idx) &&
@@ -2113,12 +2124,14 @@ static OutputStream *new_audio_stream(OptionsContext *o, AVFormatContext *oc, in
                     ost->audio_channels_map[ost->audio_channels_mapped++] = map->channel_idx;
                 }
             }
+           
         }
+ #endif
     }
 
     if (ost->stream_copy)
         check_streamcopy_filters(o, oc, ost, AVMEDIA_TYPE_AUDIO);
-
+#endif
     return ost;
 }
 
@@ -2446,7 +2459,8 @@ int MGTED_open_output_file(OptionsContext *o, const char *filename)
             init_output_filter(ofilter, o, oc);
         }
     }
-
+    //laixhcodecc去掉下面音频无法正常解码
+    //#if 0
     /* ffserver seeking with date=... needs a date reference */
     if (!strcmp(file_oformat->name, "ffm") &&
         !(format_flags & AVFMT_FLAG_BITEXACT) &&
@@ -2512,7 +2526,7 @@ int MGTED_open_output_file(OptionsContext *o, const char *filename)
             if (idx >= 0)
                 new_video_stream(o, oc, idx);
         }
-
+    
         /* audio: most channels */
         if (!o->audio_disable && av_guess_codec(oc->oformat, NULL, filename, NULL, AVMEDIA_TYPE_AUDIO) != AV_CODEC_ID_NONE) {
             int best_score = 0, idx = -1;
@@ -2639,7 +2653,8 @@ loop_end:
             }
         }
     }
-
+    //laixhcodecc去掉下面音频可以正常解码
+    #if 0
     /* handle attached files */
     for (i = 0; i < o->nb_attachments; i++) {
         AVIOContext *pb;
@@ -2735,6 +2750,8 @@ loop_end:
                option->help ? option->help : "", nb_output_files - 1, filename);
     }
     av_dict_free(&unused_opts);
+    //laixhcodecc去掉下面音频也可以正常解码
+    //#if 0
 
     /* set the decoding_needed flags and create simple filtergraphs */
     for (i = of->ost_index; i < nb_output_streams; i++) {
@@ -3032,6 +3049,7 @@ loop_end:
             av_dict_set(m, o->metadata[i].u.str, *val ? val : NULL, 0);
         }
     }
+#endif
     return 0;
 }
 
